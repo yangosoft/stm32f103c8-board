@@ -1,0 +1,143 @@
+#include "stm32f10x.h"
+//#include <libopencm3/stm32/f1/gpio.h>
+
+#define GPIO_TYPE_IN_FLOATING			0x4
+#define GPIO_TYPE_IN_PULL_UP			0x8
+#define GPIO_TYPE_OUT_GEN_PURP_PUSH_PULL	0x1
+
+#define GPIO_VALUE_INPUT_PULL_DOWN		0x0
+#define GPIO_VALUE_INPUT_PULL_UP		0x1
+
+
+#define APB2_USART1EN		(1 << 14)
+#define APB2_IOPCEN		(1 << 4)
+#define APB2_IOPBEN		(1 << 3)
+#define APB2_IOPAEN		(1 << 2)
+#define APB2_AFIOEN		(1 << 0)
+#define APB1_TIM3EN		(1 << 1)
+void rcc_init(void)
+{
+	//SYSTEM CLOCK FROM PLL OP, PLL CLOCK SOURCE IS PREDIV1
+	//(ie HSE external crstal clock (8MHz)
+	//PLL CLOCK MULT FACT = 3
+	RCC->CFGR |= (2<<0)|(1<<16)|(1<<18);
+	//HSE OSC ON, PLL ON
+	RCC->CR |= (1<<16)|(1<<24);
+
+	RCC->APB1ENR |= 1<<0;//TIM2EN 
+	//APB2 peripheral clock enable register
+	RCC->APB2ENR |= (APB2_USART1EN | APB2_IOPCEN | APB2_IOPBEN | APB2_IOPAEN | APB2_AFIOEN);
+	//RCC->APB1ENR |= (APB1_TIM3EN);
+}
+
+void gpio_set_type(GPIO_TypeDef *port, int pin, int value)
+{
+	if (pin < 8 && pin >= 0) {
+		port->CRL |= (value << (pin * 4));
+	} 
+	else if (pin < 16 && pin >= 8)
+	{
+		port->CRH |= (value << ((pin - 8) * 4));
+	}
+	//else { error }
+	
+}
+
+void gpio_set_value(GPIO_TypeDef *port, int pin, int value)
+{
+	if (value == 1 && (pin >= 0 && pin < 16)) {
+		port->BSRR |= (1 << pin);
+	}
+	else if (value == 0 && (pin >= 0 && pin < 16)) {
+		port->BSRR |= (1 << pin << 16);
+	}
+	//else { error }
+}
+
+int gpio_get_value(GPIO_TypeDef *port, int pin)
+{
+	if ((port->IDR & (1 << pin)) > 0) {
+		return 1;
+	}
+	else {
+		return 0;
+	}
+
+}
+
+void gpio_init()
+{
+	GPIOA->CRL = 0x0;
+	GPIOA->CRH = 0x0;
+	GPIOB->CRL = 0x0;
+	GPIOB->CRH = 0x0;
+	GPIOC->CRL = 0x0;
+	GPIOC->CRH = 0x0;
+	GPIOD->CRL = 0x0;
+	GPIOD->CRH = 0x0;
+}
+//----------------------------------------------------------------------------
+void delay(void) 
+{
+	unsigned int i = 600000;
+	
+	for(i; i > 0; i--) {
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+	}
+}
+
+void pwm(volatile unsigned char p, char k)
+{
+	volatile unsigned char i;
+	volatile unsigned char j;
+	if(k) i=p;
+	else i=255-p;
+	j=255-i;
+	gpio_set_value(GPIOC,8,1);
+	gpio_set_value(GPIOC,9,0);
+	while(i--);
+	gpio_set_value(GPIOC,8,0);
+	gpio_set_value(GPIOC,9,1);
+	while(j--);
+}
+
+tim2_init()
+{
+	TIM2->CR1 |= 1<<0;//CEN
+	TIM2->PSC = 1000;
+	TIM2->ARR = 24000;
+}
+
+int main(void)
+{
+	rcc_init();	
+	gpio_init();
+	tim2_init();
+	int i,j,k=0;
+	gpio_set_type(GPIOC, 8, GPIO_TYPE_OUT_GEN_PURP_PUSH_PULL);
+	gpio_set_type(GPIOC, 9, GPIO_TYPE_OUT_GEN_PURP_PUSH_PULL);
+	gpio_set_type(GPIOA, 0, GPIO_TYPE_IN_PULL_UP);
+
+	gpio_set_value(GPIOC,8,1);
+	gpio_set_value(GPIOC,9,0);
+
+	while(1) {
+	/*	k^=1;
+		for(i=0;i<256;i++) {
+			for(j=0;j<10;j++)
+				pwm(i,k);
+		}*/
+
+	while(gpio_get_value(GPIOA,0)){delay();}
+   	
+	GPIOC->ODR ^= (1<<9)|(1<<8);
+	{
+	//GPIOC->ODR ^= (1<<9)|(1<<8);
+	//while(!(TIM2->SR & (1<<0)));
+	//TIM2->SR &= ~(1<<0);
+	}
+	}
+}
