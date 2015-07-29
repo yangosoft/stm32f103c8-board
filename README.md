@@ -1,2 +1,10 @@
 # stm32f103c8-board
 Demo board made with Eagle and working with GCC G++ Makefile FreeRTOS CAN
+
+
+This project runs FreeRTOS 8.2.1 with OpenCM3  through STM32F103C8, a cheap ARM 32bits Cortex M3, in a custom board designed with Eagle 7.
+
+It also contains a port of FreeRTOS 8.2.1 with OpenCM3 and C++ support for cheap eBay boards with STM32F103RB6 and LCD screens like http://hackaday.com/2012/11/07/developing-with-ebay-sourced-arm-lcd-dev-boards/
+
+
+Zizzle http://zizzle-brewbot.blogspot.com.es/2012/10/stm32-lcd-touch-screen-demo.html has done a better work with FreeRTOS 7 and Eclipse.
