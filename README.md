@@ -5,7 +5,7 @@ Quick demo board made with Eagle and working with GCC G++ OpenCM3 Makefile FreeR
 
 This project runs FreeRTOS 8.2.1 with OpenCM3  through STM32F103C8, a cheap ARM 32bits Cortex M3, in a custom board designed with Eagle 7.
 
-** I forgot to add an CH340G for USB <-> Serial programming **
+_I forgot to add an CH340G for USB <-> Serial programming_
 
 
 ## STM32F103RB6
