@@ -1,6 +1,6 @@
 
 
-/* Define memory regions. */
+/* Define memory regions. 20K of flash*/
 MEMORY
 {
 	rom (rx) : ORIGIN = 0x08000000, LENGTH = 64K
